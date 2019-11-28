@@ -2,7 +2,6 @@ package hello.moi.appliprojet;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,11 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private Button sendButton;
     private TextView[] textViews;
     private boolean flag;
-    private String tmp;
     private int port = 10000;
     private InetAddress address;
-
-    private CountDownTimer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (SocketException e) {
             e.printStackTrace();
         }
+        new SendTask().execute();
         new ReceiverTask().execute();
 
         sendButton.setOnClickListener(new View.OnClickListener() {
@@ -60,20 +57,6 @@ public class MainActivity extends AppCompatActivity {
                 send(formatEditText.getText().toString());
             }
         });
-
-        timer = new CountDownTimer(1000, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-
-            }
-
-            @Override
-            public void onFinish() {
-                send("getValues()");
-                this.start();
-            }
-        };
-        timer.start();
     }
 
     public void send(String message) {
@@ -85,6 +68,21 @@ public class MainActivity extends AppCompatActivity {
             udpSocket.send(packet);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private class SendTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            while (true) {
+                send("getValues()");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
